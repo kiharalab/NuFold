@@ -13,8 +13,16 @@ conda install numpy==1.21.0 -c conda-forge
 * rMSA
 `To be written`
 
-* IPknot
-`To be written`
+* IPknot (Use precompiled binary)
+```
+wget https://github.com/satoken/ipknot/releases/download/v1.1.0/ipknot-1.1.0-x86_64-linux.zip
+unzip ipknot-1.1.0-x86_64-linux.zip
+rm ipknot-1.1.0-x86_64-linux/README.md
+mv ipknot-1.1.0-x86_64-linux/ipknot /content
+rmdir ipknot-1.1.0-x86_64-linux
+rm ipknot-1.1.0-x86_64-linux.zip
+chmod +x ipknot
+```
 
 * Download checkpoint
 ```
