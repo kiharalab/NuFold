@@ -6,6 +6,7 @@ import pickle
 
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
 from nufold.config import model_config
 from nufold.model.nufold import Nufold
 from nufold.data import feature_pipeline, data_pipeline
@@ -65,6 +66,7 @@ def _main():
 
     for n, (d, s) in enumerate(input_seqs.items()):
         plddt_scores = []
+        plddt_data = []
         for i in range(ITER):
             print(f"{n}th: {d} is processing...")
             if os.path.exists(f"{OUTPUT_DIR}/{d}/{d}_unrelaxed{i}.pdb"):
@@ -131,6 +133,7 @@ def _main():
             # Compute mean pLDDT score for the structure
             mean_plddt = np.mean(out["plddt"])
             plddt_scores.append((i, mean_plddt))
+            plddt_data.append((i, out["plddt"]))
 
         # Sort structures based on mean pLDDT scores in descending order
         plddt_scores.sort(key=lambda x: x[1], reverse=True)
@@ -140,6 +143,18 @@ def _main():
             old_path = f"{OUTPUT_DIR}/{d}/{d}_unrelaxed{i}.pdb"
             new_path = f"{OUTPUT_DIR}/{d}/{d}_rank_{rank}.pdb"
             os.rename(old_path, new_path)
+
+        # Plot pLDDT over residue for each structure
+        plt.figure(figsize=(10, 6))
+        for i, plddt in plddt_data:
+            plt.plot(plddt, label=f"Structure {i}")
+        plt.xlabel("Residue")
+        plt.ylabel("pLDDT")
+        plt.title(f"pLDDT over Residue for {d}")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(f"{OUTPUT_DIR}/{d}/{d}_plddt_plot.png")
+        plt.close()
 
     return
 
