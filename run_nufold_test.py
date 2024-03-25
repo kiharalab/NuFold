@@ -17,6 +17,22 @@ from nufold.common import base_constants
 torch.set_grad_enabled(False)
 
 
+def mean_plddt_from_pdb(pdb_file_path):
+    plddt_scores = []
+    with open(pdb_file_path, 'r') as pdb_file:
+        for line in pdb_file:
+            if line.startswith('ATOM'):
+                # Extract the B-factor (pLDDT score) from columns 61-66 in PDB format
+                # Note: PDB columns are 1-indexed, but Python string indexing is 0-indexed
+                b_factor = float(line[60:66].strip())
+                plddt_scores.append(b_factor)
+    if plddt_scores:
+        mean_plddt = sum(plddt_scores) / len(plddt_scores)
+        return mean_plddt
+    else:
+        return None
+
+
 def _main():
     """
     """
@@ -69,9 +85,6 @@ def _main():
         plddt_data = []
         for i in range(ITER):
             print(f"{n}th: {d} is processing...")
-            if os.path.exists(f"{OUTPUT_DIR}/{d}/{d}_unrelaxed{i}.pdb"):
-                print(f"{OUTPUT_DIR}/{d}/{d}_unrelaxed{i}.pdb is exists, skipping...", file=sys.stderr)
-                continue
             os.makedirs(f"{OUTPUT_DIR}/{d}", exist_ok=True)
 
             # read alignment
@@ -130,30 +143,39 @@ def _main():
             with open(f"{OUTPUT_DIR}/{d}/{d}_out_{i}.pkl", "wb") as ofh:
                 pickle.dump(out, ofh, protocol=pickle.HIGHEST_PROTOCOL)
 
-            # Compute mean pLDDT score for the structure
-            mean_plddt = np.mean(out["plddt"])
-            plddt_scores.append((i, mean_plddt))
-            plddt_data.append((i, out["plddt"]))
+        # Compute mean pLDDT scores for all generated structures
+        for file in os.listdir(f"{OUTPUT_DIR}/{d}"):
+            if file.endswith(".pdb"):
+                pdb_file_path = os.path.join(f"{OUTPUT_DIR}/{d}", file)
+                mean_plddt = mean_plddt_from_pdb(pdb_file_path)
+                if mean_plddt is not None:
+                    plddt_scores.append((file, mean_plddt))
 
         # Sort structures based on mean pLDDT scores in descending order
         plddt_scores.sort(key=lambda x: x[1], reverse=True)
 
         # Rename structures based on their pLDDT rank
-        for rank, (i, _) in enumerate(plddt_scores, start=1):
-            old_path = f"{OUTPUT_DIR}/{d}/{d}_unrelaxed{i}.pdb"
-            new_path = f"{OUTPUT_DIR}/{d}/{d}_rank_{rank}.pdb"
+        for rank, (file, _) in enumerate(plddt_scores, start=1):
+            old_path = os.path.join(f"{OUTPUT_DIR}/{d}", file)
+            new_path = os.path.join(f"{OUTPUT_DIR}/{d}", f"{d}_rank_{rank}.pdb")
             os.rename(old_path, new_path)
 
-        # Plot pLDDT over residue for each structure
+        # Plot pLDDT over residue for each ranked structure
         plt.figure(figsize=(10, 6))
-        for i, plddt in plddt_data:
-            plt.plot(plddt, label=f"Structure {i}")
-        plt.xlabel("Residue")
+        for rank in range(1, len(plddt_scores) + 1):
+            pdb_file_path = os.path.join(f"{OUTPUT_DIR}/{d}", f"{d}_rank_{rank}.pdb")
+            with open(pdb_file_path, 'r') as pdb_file:
+                plddt_data = [float(line[60:66].strip()) for line in pdb_file if line.startswith('ATOM')]
+            plt.plot(plddt_data, label=f"Rank {rank}")
+        plt.xlabel("Atom")
         plt.ylabel("pLDDT")
-        plt.title(f"pLDDT over Residue for {d}")
-        plt.legend()
+        plt.title(f"pLDDT over Atom for {d}")
+        plt.legend(fontsize=10)  # Adjust legend font size
         plt.grid(True)
-        plt.savefig(f"{OUTPUT_DIR}/{d}/{d}_plddt_plot.png")
+        plt.xticks(fontsize=8)  # Adjust x-axis tick label font size
+        plt.yticks(fontsize=8)  # Adjust y-axis tick label font size
+        plt.tight_layout()  # Adjust subplot params to fit the figure area
+        plt.savefig(f"{OUTPUT_DIR}/{d}/{d}_plddt_plot.png", dpi=300)
         plt.close()
 
     return
