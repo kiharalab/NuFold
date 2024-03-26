@@ -11,7 +11,8 @@ Cite : [Kagaya, Y., Zhang, Z., Ibtehaz, N., Wang, X., Nakamura, T., Huang, D., &
 
 Online Platform:
 
-1. Colab: https://bit.ly/emap2sec or https://github.com/kiharalab/Emap2sec/blob/master/Emap2sec.ipynb
+1. [Google Colab](https://colab.research.google.com/github/kiharalab/nufold/blob/master/ColabNuFold.ipynb)
+
 
 
 ## Environment Setup and Installation
