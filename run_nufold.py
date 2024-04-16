@@ -34,8 +34,6 @@ def mean_plddt_from_pdb(pdb_file_path):
 
 
 def _main():
-    """
-    """
     args = argparser()
 
     INPUT_DIR = args.input_dir
@@ -56,7 +54,7 @@ def _main():
 
     dp = data_pipeline.DataPipeline(
         template_featurizer=None,
-        ss_enabled = True
+        ss_enabled=True
     )
 
     random_seed = random.randrange(2**32)
@@ -104,8 +102,8 @@ def _main():
                 feature_dict, mode='predict',
             )
             batch = {
-                k:torch.as_tensor(v, device="cuda:0").unsqueeze(0)  # add batch dim
-                for k,v in processed_feature_dict.items()
+                k: torch.as_tensor(v, device="cuda:0").unsqueeze(0)  # add batch dim
+                for k, v in processed_feature_dict.items()
             }
 
             with torch.no_grad():
@@ -113,15 +111,15 @@ def _main():
                 for j, _d in enumerate(out["recycling"]):
                     _d.update(model.aux_heads(_d))
                     _dd = tensor_tree_map(lambda x: np.array(x.cpu()), _d)
-                    strcture = from_prediction(
+                    structure = from_prediction(
                         tensor_tree_map(lambda x: np.array(x[..., j].cpu()), batch),
                         _dd,
-                        b_factors = np.repeat(
+                        b_factors=np.repeat(
                             _dd["plddt"][..., None], base_constants.atom_type_num, axis=-1
                         )
                     )
                     with open(f"{OUTPUT_DIR}/{d}/{d}_unrelaxed_rec_{j}.pdb", "wt") as f:
-                        print(to_pdb(strcture), file=f)
+                        print(to_pdb(structure), file=f)
 
                 batch = tensor_tree_map(
                     lambda x: np.array(x[..., -1].cpu()),
@@ -129,15 +127,15 @@ def _main():
                 )
                 out = tensor_tree_map(lambda x: np.array(x.cpu()), out)
 
-            strcture = from_prediction(
+            structure = from_prediction(
                 batch,
                 out,
-                b_factors = np.repeat(
+                b_factors=np.repeat(
                     out["plddt"][..., None], base_constants.atom_type_num, axis=-1
                 )
             )
             with open(f"{OUTPUT_DIR}/{d}/{d}_unrelaxed{i}.pdb", "wt") as f:
-                print(to_pdb(strcture), file=f)
+                print(to_pdb(structure), file=f)
             with open(f"{OUTPUT_DIR}/{d}/{d}_in_{i}.pkl", "wb") as ofh:
                 pickle.dump(batch, ofh, protocol=pickle.HIGHEST_PROTOCOL)
             with open(f"{OUTPUT_DIR}/{d}/{d}_out_{i}.pkl", "wb") as ofh:
@@ -165,11 +163,18 @@ def _main():
         for rank in range(1, len(plddt_scores) + 1):
             pdb_file_path = os.path.join(f"{OUTPUT_DIR}/{d}", f"{d}_rank_{rank}.pdb")
             with open(pdb_file_path, 'r') as pdb_file:
-                plddt_data = [float(line[60:66].strip()) for line in pdb_file if line.startswith('ATOM')]
+                plddt_data = []
+                prev_residue = None
+                for line in pdb_file:
+                    if line.startswith('ATOM'):
+                        current_residue = int(line[22:26].strip())
+                        if current_residue != prev_residue:
+                            plddt_data.append(float(line[60:66].strip()))
+                            prev_residue = current_residue
             plt.plot(plddt_data, label=f"Rank {rank}")
-        plt.xlabel("Atom")
+        plt.xlabel("Residue")
         plt.ylabel("pLDDT")
-        plt.title(f"pLDDT over Atom for {d}")
+        plt.title(f"pLDDT over Residue for {d}")
         plt.legend(fontsize=10)  # Adjust legend font size
         plt.grid(True)
         plt.xticks(fontsize=8)  # Adjust x-axis tick label font size
@@ -232,7 +237,6 @@ def argparser():
     parser.add_argument(
         "--recycle", type=int, default=3,
     )
-
 
     args = parser.parse_args()
     return args
