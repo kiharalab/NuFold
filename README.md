@@ -10,6 +10,7 @@ Cite: [Kagaya, Y., Zhang, Z., Ibtehaz, N., Wang, X., Nakamura, T., Punuru, P.D.,
 
 Online Platform:
 1. [Google Colab](https://colab.research.google.com/github/kiharalab/nufold/blob/master/ColabNuFold.ipynb)
+    * This implements quick rMSA due to a hardware limitation.
 
 ## Environment Setup and Installation
 
@@ -87,7 +88,7 @@ test_input/
 ```
 To generate those files, you can follow the steps below
 
-### 1. run rMSA
+### 1. Run rMSA
 First, generate the MSA with following command:
 ```
 rMSA/rMSA.pl test_input/2DER_C/2DER_C.fasta -cpu=32
@@ -95,13 +96,13 @@ cp test_input/2DER_C/2DER_C.afa test_input/2DER_C/2DER_C.a3m
 ```
 This step may take a couple of hours to a half day, depends on the target sequence.
 
-### run IPknot
+### 2. Run IPknot
 ```
 ipknot-1.1.0-x86_64-linux/ipknot test_input/2DER_C/2DER_C.fasta > test_input/2DER_C/2DER_C.ipknot.ss
 ```
 This step typically takes a few seconds.
 
-### run NuFold
+### 3. Run NuFold
 To run NuFold inference, you can use following command:
 ```
 python3 run_nufold.py \
