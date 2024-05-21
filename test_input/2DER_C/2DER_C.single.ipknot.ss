@@ -1,0 +1,3 @@
+>2DER_C
+GUCCCCUUCGUCUAGAGGCCCAGGACACCGCCCUUUCACGGCGGUAACAGGGGUUCGAAUCCCCUAGGGGACGCCA
+(((((((..[[[[.((.((...]]]]((((((.......))))))...[[[[)))).....]]]])))))))....

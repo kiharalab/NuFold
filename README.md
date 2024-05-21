@@ -13,47 +13,44 @@ Online Platform:
 
 ## Environment Setup and Installation
 
-### 1. Conda Environment
+### 0. System requirements
+The code was tested on the following environment.
+* OS: Ubuntu 22.04 LTS
+* CPU: modern x86_64 CPUs
+* GPU: NVIDIA GeForce RTX 3090 24GB
+    * VRAM requirement depends on the length of input RNA
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/kiharalab/NuFold.git
+cd NuFold/
+```
+
+### 2. Conda Environment
 Start by setting up a dedicated Conda environment:
 
 ```bash
 conda create -n nufold_P python=3.10
 conda activate nufold_P
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+pip3 install ml-collections dm-tree deepspeed protobuf scipy biopython numpy matplotlib
 ```
+* NuFold was trained with PyTorch `1.10.0+cu111`, and tested with PyTorch `2.0.1+cu117`.
 
-### 2. PyTorch and Related Libraries
-Install the latest version of PyTorch and associated libraries with CUDA support for optimized performance:
 
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
-```
-
-### 3. Additional Dependencies
-Install the necessary Python packages for NuFold:
-
-```bash
-pip install ml-collections dm-tree deepspeed protobuf scipy biopython numpy shutil
-```
-
-### 4. Aria2 for Downloading
-For efficient downloading of large files, install Aria2:
-
-```bash
-apt-get install aria2
-```
-
-## rMSA Configuration
-Clone rMSA and set up the database:
-
+### 3. third party software
+#### 3.1. rMSA
+Clone rMSA and set up the database by following the instruction of rMSA:
 ```bash
 git clone https://github.com/pylelab/rMSA
-cd rMSA/database/
-aria2c -q -R -x 16 -j 20 -s 65536 -c --optimize-concurrent-downloads https://kiharalab.org/nufold/database.zip
-unzip database.zip && rm database.zip
-cd ../..
+cd rMSA/
+./database/script/update.sh
+cd ../
 ```
+* This may takes ~2 TB of disks, and a few hours to process. Please be patient.
 
-## IPknot Setup
+#### 3.2. IPknot
 IPknot is used for RNA secondary structure prediction. Download and set it up with the following commands:
 
 ```bash
@@ -71,18 +68,49 @@ wget -O checkpoints/global_step145245.pt http://kiharalab.org/nufold/global_step
 ```
 
 ## Running NuFold with the End-to-End Script
-We have created a new script that simplifies the process of running NuFold. To predict RNA structures with NuFold using the end-to-end script, follow these steps:
-
-1. Make the `nufold.py` script executable:
-
-```bash
-chmod +x nufold.py
+To run NuFold, you need to prepare the directory structure as following:
+```
+input_dir/
+    [TARGET_ID]/
+        [TARGET_ID].fasta
+        [TARGET_ID].a3m
+        [TARGET_ID].ipknot.ss
 ```
 
-2. Run NuFold by providing the RNA sequence as a command-line argument:
-
-```bash
-./nufold.py your_sequence
+You can take a look at `test_input` directory, which have following structure.
 ```
+test_input/
+    2DER_C/
+        2DER_C.fasta
+        2DER_C.a3m
+        2DER_C.ipknot.ss
+```
+To generate those files, you can follow the steps below
 
-The script will automatically generate a random job name, create the necessary directories, perform data preprocessing, run NuFold, and save the output in the `nufold_output.zip` file.
+### 1. run rMSA
+First, generate the MSA with following command:
+```
+rMSA/rMSA.pl test_input/2DER_C/2DER_C.fasta -cpu=32
+cp test_input/2DER_C/2DER_C.afa test_input/2DER_C/2DER_C.a3m
+```
+This step may take a couple of hours to a half day, depends on the target sequence.
+
+### run IPknot
+```
+ipknot-1.1.0-x86_64-linux/ipknot test_input/2DER_C/2DER_C.fasta > test_input/2DER_C/2DER_C.ipknot.ss
+```
+This step typically takes a few seconds.
+
+### run NuFold
+To run NuFold inference, you can use following command:
+```
+python3 run_nufold.py \
+  --ckpt_path checkpoints/global_step145245.pt \
+  --input_fasta test_input/2DER_C/2DER_C.fasta \
+  --input_dir test_input/ \
+  --output_dir test_output \
+  --config_preset initial_training
+```
+This step will take up to ~5 minutes.
+Your result will be found at `test_output/2DER_C/2DER_C_rank_1.pdb`.
+

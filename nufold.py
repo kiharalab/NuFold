@@ -11,8 +11,8 @@ def run_command(command):
 def preprocess_data(fasta_filepath, job_dir):
     run_command(f"ipknot {fasta_filepath} > {fasta_filepath.replace('.fasta', '')}.ipknot.ss")
     print("ipknot output saved")
-    run_command(f"sed -i 's@$dbdir/nt@@g' rMSA/rMSA.pl")
-    run_command(f"rMSA/rMSA.pl {fasta_filepath} -cpu=2")
+    # run_command(f"sed -i 's@$dbdir/nt@@g' rMSA/rMSA.pl")
+    run_command(f"rMSA/rMSA.pl {fasta_filepath} -cpu=32")
     print("rMSA.pl run completed.")
 
 def run_nufold(fasta_filepath, job_base_dir, output_dir):
