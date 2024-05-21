@@ -3,7 +3,8 @@
 
 NuFold is a state-of-the-art method designed for predicting 3D RNA structures, leveraging deep learning for high accuracy and reliability. This tool is particularly useful for biologists and bioinformatics researchers focusing on RNA function and structure.
 
-License: GPL v3 for academic use. (For commercial use, please contact us for different licensing)
+License: GPL v3 (Please contact us for different licensing)
+
 Contact: Daisuke Kihara (dkihara@purdue.edu)
 
 Cite: [Kagaya, Y., Zhang, Z., Ibtehaz, N., Wang, X., Nakamura, T., Punuru, P.D., & Kihara, D. (2023). NuFold: A Novel Tertiary RNA Structure Prediction Method Using Deep Learning with Flexible Nucleobase Center Representation.](https://www.biorxiv.org/content/10.1101/2023.09.20.558715v1) In submission (an earlier version in bioRxiv).
