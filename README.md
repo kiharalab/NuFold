@@ -1,5 +1,5 @@
 # NuFold: 3D RNA Structure Prediction Method
-![nufold](https://media.github.itap.purdue.edu/user/6911/files/5e300498-a159-40e4-9de4-a008ec7466fc)
+![nufold](nufold/NuFoldLogo.png)
 
 NuFold is a state-of-the-art method designed for predicting 3D RNA structures, leveraging deep learning for high accuracy and reliability. This tool is particularly useful for biologists and bioinformatics researchers focusing on RNA function and structure.
 
