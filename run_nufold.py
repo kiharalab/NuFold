@@ -74,7 +74,7 @@ def _main():
                 _n = line.strip()[1:]
                 _s = ""
             else:
-                _s += line.strip()
+                _s += line.strip().upper()
         if _n:
             input_seqs[_n] = _s
 
@@ -94,8 +94,8 @@ def _main():
                     dp,
                     f"{OUTPUT_DIR}/{d}",
                 )
-            except:
-                print("parse error...")
+            except ValueError as e:
+                print(f"parse error:\n{e}")
                 continue
 
             processed_feature_dict = feature_processor.process_features(
@@ -204,7 +204,7 @@ def generate_feature_dict(
     )
 
     # Remove temporary FASTA file
-    os.remove(tmp_fasta_path)
+    #os.remove(tmp_fasta_path)
 
     return feature_dict
 
