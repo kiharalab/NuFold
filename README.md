@@ -7,11 +7,12 @@ License: GPL v3 (Please contact us for different licensing)
 
 Contact: Daisuke Kihara (dkihara@purdue.edu)
 
-Cite: [Kagaya, Y., Zhang, Z., Ibtehaz, N., Wang, X., Nakamura, T., Punuru, P.D., & Kihara, D. (2023). NuFold: A Novel Tertiary RNA Structure Prediction Method Using Deep Learning with Flexible Nucleobase Center Representation.](https://www.biorxiv.org/content/10.1101/2023.09.20.558715v1) In submission (an earlier version in bioRxiv).
+
 
 Online Platform:
 1. [Google Colab](https://colab.research.google.com/github/kiharalab/nufold/blob/master/ColabNuFold.ipynb)
     * This implements quick rMSA due to a hardware limitation.
+
 
 ## Environment Setup and Installation
 
@@ -116,3 +117,14 @@ python3 run_nufold.py \
 This step will take up to ~5 minutes.
 Your result will be found at `test_output/2DER_C/2DER_C_rank_1.pdb`.
 
+
+## Cite
+Yuki Kagaya, Zicong Zhang, Nabil Ibtehaz, Xiao Wang, Tsukasa Nakamura, Pranav Deep Punuru & Daisuke Kihara. "NuFold: end-to-end approach for RNA tertiary structure prediction with flexible nucleobase center representation." Nature Communications, 2025 [https://www.nature.com/articles/s41467-025-56261-7](https://www.nature.com/articles/s41467-025-56261-7)
+```
+@article{Kagaya2025NuFold,
+  title={NuFold: end-to-end approach for RNA tertiary structure prediction with flexible nucleobase center representation},
+  author={Yuki Kagaya, Zicong Zhang, Nabil Ibtehaz, Xiao Wang, Tsukasa Nakamura, Pranav Deep Punuru, and Daisuke Kihara},
+  journal={Nature Communications},
+  year={2025}
+}
+```
